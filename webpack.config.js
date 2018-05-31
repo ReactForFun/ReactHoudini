@@ -1,8 +1,9 @@
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const pkg = require('./package.json');
 const path = require('path');
 
 const libraryName = pkg.name;
+const devMode = process.env.NODE_ENV !== 'production';
 
 module.exports = {
   entry: path.join(__dirname, './src/index.js'),
@@ -16,8 +17,9 @@ module.exports = {
     umdNamedDefine: true
   },
   plugins: [
-    new ExtractTextPlugin({
-      filename: 'index.css'
+    new MiniCssExtractPlugin({
+      filename: devMode ? '[name].css' : '[name].[hash].css',
+      chunkFilename: devMode ? '[id].css' : '[id].[hash].css'
     })
   ],
   node: {
@@ -42,11 +44,13 @@ module.exports = {
         ]
       },
       {
-        test: /\.*css$/,
-        use: ExtractTextPlugin.extract({
-          fallback: 'style-loader',
-          use: ['css-loader', 'sass-loader']
-        })
+        test: /\.s?[ac]ss$/,
+        use: [
+          devMode ? 'style-loader' : MiniCssExtractPlugin.loader,
+          'css-loader',
+          'postcss-loader',
+          'sass-loader'
+        ]
       },
       {
         test: /\.(js|jsx)$/,
@@ -55,7 +59,7 @@ module.exports = {
         use: {
           loader: 'babel-loader',
           options: {
-            presets: ['env']
+            presets: ['@babel/preset-env']
           }
         }
       },
@@ -77,7 +81,6 @@ module.exports = {
   },
   externals: {
     // Don't bundle react or react-dom
-    // react: 'commonjs react'
     react: {
       commonjs: 'react',
       commonjs2: 'react',

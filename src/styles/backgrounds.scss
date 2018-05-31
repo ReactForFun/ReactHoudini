@@ -1,8 +1,0 @@
-.el {
-    background: conic-gradient(red, magenta, blue, cyan, lime, yellow, red);
-}
-@supports (background: paint(id)) {
-    .el.is-loaded {
-        background: paint(conic-gradient, red magenta blue cyan lime yellow red);
-    }
-}
